@@ -18,19 +18,29 @@ typedef struct PageHeader {
     uint16_t free_start;  // offset to start of free space
     uint16_t free_end;    // offset to end of free space
     uint16_t total_free;  // free_end - free_start
+    uint8_t flags;
 } PageHeader;
 
+typedef struct CellPointer {
+    uint16_t cell_location;
+    uint16_t cell_size;
+} CellPointer;
+
 typedef struct PointerList {
-    uint16_t* start;
+    CellPointer* start;
     uint16_t size;
 } PointerList;
+
+#define PAGE_HEADER(page) \
+    ((PageHeader*)page)
 
 void* new_page(enum PageType type, uint32_t id);
 void save_page(uint32_t fd, void* page);
 void* load_page(uint32_t fd, uint32_t page_id);
-PageHeader* get_page_header(void* page);
+PointerList pointer_list(void* page);
 uint16_t add_cell(void* page, void* cell, uint16_t cell_size);
-void remove_cell(void* page, uint16_t cell_pointer);
-void* get_cell(void* page, uint16_t cell_location);
+void remove_cell(void* page, uint16_t pointer_offset);
+void* get_cell(void* page, uint16_t pointer_offset);
+void compact(void* page);
 
 #endif

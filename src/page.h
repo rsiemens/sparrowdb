@@ -5,6 +5,7 @@
 #include <string.h>
 
 #define PAGE_SIZE 4096
+#define CAN_COMPACT 0x01
 
 enum PageType {
     ROOT = 1,
@@ -39,8 +40,8 @@ void save_page(uint32_t fd, void* page);
 void* load_page(uint32_t fd, uint32_t page_id);
 PointerList pointer_list(void* page);
 uint16_t add_cell(void* page, void* cell, uint16_t cell_size);
-void remove_cell(void* page, uint16_t pointer_offset);
-void* get_cell(void* page, uint16_t pointer_offset);
+void remove_cell(void* page, uint16_t idx);
+void* get_cell(void* page, uint16_t idx);
 void compact(void* page);
 
 #endif

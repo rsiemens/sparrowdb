@@ -6,7 +6,11 @@
 
 #include "page.h"
 
-#define CAN_COMPACT 0x01
+#define CELLPOINTER_OFFSET_TO_IDX(offset) \
+    ((offset - sizeof(PageHeader)) / sizeof(CellPointer))
+
+#define CELLPOINTER_IDX_TO_OFFSET(idx) \
+    (idx * sizeof(CellPointer) + sizeof(PageHeader))
 
 /**
  * A page starts as just a blank slate of congruent bytes of a fixed PAGE_SIZE.
@@ -97,14 +101,16 @@ uint16_t add_cell(void* page, void* cell, uint16_t cell_size) {
     header->free_start += sizeof(CellPointer);
     header->total_free = header->free_end - header->free_start;
 
-    return pointer_offset;
+    return CELLPOINTER_OFFSET_TO_IDX(pointer_offset);
 }
 
 /**
  * Simply unlink the cell and mark as eligible for compaction. Recovery of the space can be deferred
  * till later.
  */
-void remove_cell(void* page, uint16_t pointer_offset) {
+void remove_cell(void* page, uint16_t idx) {
+    uint16_t pointer_offset = CELLPOINTER_IDX_TO_OFFSET(idx);
+
     PAGE_HEADER(page)->flags |= CAN_COMPACT;
     ((CellPointer*)(page + pointer_offset))->cell_location = 0;
 }
@@ -112,7 +118,8 @@ void remove_cell(void* page, uint16_t pointer_offset) {
 /**
  * Returns the pointer to a cell
  */
-void* get_cell(void* page, uint16_t pointer_offset) {
+void* get_cell(void* page, uint16_t idx) {
+    uint16_t pointer_offset = CELLPOINTER_IDX_TO_OFFSET(idx);
     uint16_t cell_location = ((CellPointer*)(page + pointer_offset))->cell_location;
 
     if (cell_location == 0) {

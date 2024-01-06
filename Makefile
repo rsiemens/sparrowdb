@@ -12,8 +12,8 @@ test:
 	./run_tests
 
 clean:
-	rm sparrow || true
-	rm run_tests || true
-	rm *.o  || true
-	rm *.db || true
-	rm -r sparrow.dSYM || true
+	rm -f sparrow
+	rm -f run_tests
+	rm -f *.o
+	rm -f *.db
+	rm -f sparrow.dSYM
